@@ -1,0 +1,9 @@
+{
+  "lomboksql.error.invalid_ast": "The query structure is invalid.",
+  "lomboksql.error.invalid_identifier": "An identifier is empty, contains a NUL character, or has an empty path part.",
+  "lomboksql.error.invalid_dialect": "The SQL dialect is not supported.",
+  "lomboksql.error.invalid_limit": "Limit and offset must be non-negative integers.",
+  "lomboksql.error.unsupported_feature": "This feature is not supported by the selected dialect.",
+  "lomboksql.error.missing_where": "Update and delete require a condition or an explicit all flag.",
+  "lomboksql.error.too_deep": "The query is nested too deeply."
+}

@@ -1,0 +1,66 @@
+# Mandiri sementara (TD-02/TD-P0-08): ganti dengan pemanggil lombok-ci.yml dari codinglombok/.github
+# dan pin setiap action ke SHA sebelum rilis pertama.
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  typescript:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm ci
+        working-directory: typescript
+      - run: npm run typecheck
+        working-directory: typescript
+      - run: npm test
+        working-directory: typescript
+      - run: npm pack --dry-run
+        working-directory: typescript
+  rust:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+          targets: thumbv7em-none-eabi
+      - run: cargo fmt --check
+        working-directory: rust
+      - run: cargo clippy --all-targets -- -D warnings
+        working-directory: rust
+      - run: cargo test
+        working-directory: rust
+      - run: cargo build --no-default-features
+        working-directory: rust
+      - name: no_std on a bare-metal target (GP-4)
+        run: cargo build --no-default-features --target thumbv7em-none-eabi
+        working-directory: rust
+      - run: cargo publish --dry-run --allow-dirty
+        working-directory: rust
+  mutation:
+    runs-on: ubuntu-latest
+    needs: typescript
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci && npm run build && npx tsc -p tsconfig.test.json
+        working-directory: typescript
+      - run: node scripts/mutation-test.mjs

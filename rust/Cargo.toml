@@ -1,0 +1,22 @@
+[package]
+name = "lomboksql"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.70"
+description = "Universal SQL query compiler: one JSON AST to parameterized SQL for PostgreSQL, MySQL, SQLite and SQL Server. Part of the Lombok Ecosystem."
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/codinglombok/LombokSQL"
+homepage = "https://github.com/codinglombok/LombokSQL"
+readme = "../README.md"
+keywords = ["sql", "query-builder", "postgres", "mysql", "sqlite"]
+exclude = ["tests/*", ".gitignore"]
+categories = ["database", "no-std", "development-tools"]
+
+[features]
+default = ["std"]
+std = []
+
+[dependencies]
+
+[lib]
+path = "src/lib.rs"

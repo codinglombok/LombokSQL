@@ -1,0 +1,9 @@
+{
+  "lomboksql.error.invalid_ast": "Struktur query tidak valid.",
+  "lomboksql.error.invalid_identifier": "Identifier kosong, mengandung karakter NUL, atau memiliki bagian jalur yang kosong.",
+  "lomboksql.error.invalid_dialect": "Dialek SQL tidak didukung.",
+  "lomboksql.error.invalid_limit": "Limit dan offset harus bilangan bulat tak negatif.",
+  "lomboksql.error.unsupported_feature": "Fitur ini tidak didukung oleh dialek yang dipilih.",
+  "lomboksql.error.missing_where": "Update dan delete memerlukan kondisi atau penanda all yang eksplisit.",
+  "lomboksql.error.too_deep": "Query bersarang terlalu dalam."
+}
