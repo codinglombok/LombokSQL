@@ -5,7 +5,7 @@
 | Versi | Isi |
 |---|---|
 | 0.1.1 | Tutup syarat rilis: CI dijalankan, `doctor docs/privacy/style`, coverage diukur, `cargo-fuzz` target |
-| 0.2.0 | Test integrasi terhadap PostgreSQL, MySQL, SQLite, SQL Server (kontainer) di CI; `UNION`/`INTERSECT`; CTE; DDL minimal (`createTable`, `dropTable`, `createIndex`); port Python, Go, PHP |
+| 0.2.0 | Matriks versi database di CI dan SQL Server hijau (suite integrasi sudah ada untuk SQLite, PostgreSQL, MySQL); `UNION`/`INTERSECT`; CTE; DDL minimal (`createTable`, `dropTable`, `createIndex`); port Python, Go, PHP |
 | 0.3.0 | Window function; `MERGE` untuk SQL Server; `OUTPUT` untuk SQL Server; `NULLS FIRST/LAST`; crate C-ABI dan WASM (ADR-010) |
 | 0.4.0 | Java/Kotlin, C#, Swift, C++ lewat C-ABI atau port; benchmark dan ukuran biner |
 

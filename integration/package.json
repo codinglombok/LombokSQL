@@ -1,0 +1,15 @@
+{
+  "name": "lomboksql-integration",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Integration tests: execute LombokSQL output against real databases. Dev only; never published.",
+  "type": "module",
+  "scripts": {
+    "test": "node run.mjs"
+  },
+  "devDependencies": {
+    "mssql": "^11.0.0",
+    "mysql2": "^3.11.0",
+    "pg": "^8.13.0"
+  }
+}

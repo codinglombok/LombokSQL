@@ -9,6 +9,7 @@ cd typescript && npm ci && npm test        # build + test TypeScript
 node ../scripts/gen-vectors.mjs            # setelah mengubah vector; catat sha256 baru di SPEC
 cd ../rust && cargo test && cargo build --no-default-features
 node ../scripts/mutation-test.mjs          # semua mutan harus terbunuh
+cd ../integration && npm ci && node --disable-warning=ExperimentalWarning run.mjs   # SQLite selalu; tambahkan PG_URL / MYSQL_URL / MSSQL_URL untuk mesin lain
 ```
 
 4. Perubahan vector mengubah hash di `SPEC_`; perbarui `SPEC_`, `CHANGELOG.md`, dan `API_` pada PR yang sama.

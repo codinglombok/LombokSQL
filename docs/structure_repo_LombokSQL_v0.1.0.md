@@ -11,7 +11,8 @@ LombokSQL/
   locales/         en/lomboksql.json  id/lomboksql.json
   rust/            Cargo.toml  src/lib.rs  tests/vectors.rs  LICENSE-*
   typescript/      package.json  tsconfig*.json  src/  test/
-  scripts/         gen-vectors.mjs  mutation-test.mjs
+  integration/     package.json  run.mjs   (eksekusi nyata: SQLite, PostgreSQL, MySQL, SQL Server; dev saja)
+  scripts/         gen-vectors.mjs  mutation-test.mjs  run-ts-tests.mjs
   .github/workflows/  ci.yml
 ```
 

@@ -22,7 +22,7 @@ Lihat README (skenario pemakaian).
 
 ## Batasan yang Diketahui
 
-- SQL belum dieksekusi terhadap database sungguhan; kebenaran dibuktikan terhadap vector saja (TD-01).
+- Eksekusi nyata diuji pada SQLite, PostgreSQL, dan MySQL (36 skenario); SQL Server belum pernah dijalankan (TD-13). Versi minimum dialek di `SPEC_` belum diuji satu per satu.
 - Tidak ada `UNION`, CTE, window function, DDL, `NULLS FIRST/LAST`, `MERGE`.
 - `RETURNING` hanya PostgreSQL dan SQLite; upsert tidak ada untuk SQL Server.
 - `raw` tidak divalidasi; setiap `?` di dalamnya adalah placeholder.

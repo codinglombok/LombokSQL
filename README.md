@@ -92,7 +92,7 @@ assert_eq!(r.params_json(), "[1]");
 | TypeScript | YA, lulus vector | `typescript/test/vectors.test.ts` menjalankan seluruh vector; ditambah test builder dan fuzz |
 | Python, Go, PHP, Java, Kotlin, C#, C/C++, Swift, Perl | BELUM | Tidak ada kode; direncanakan setelah kontrak stabil (lihat `docs/development_ide_LombokSQL_v0.1.0.md`) |
 
-Vector: 716 kasus (556 golden berekspektasi tulis tangan, 160 regresi hasil pembangkit) pada empat dialek.
+Vector: 716 kasus (556 golden berekspektasi tulis tangan, 160 regresi hasil pembangkit) pada empat dialek. Integrasi: 36 skenario dieksekusi pada SQLite, PostgreSQL, dan MySQL (`integration/run.mjs`).
 
 ## Standar yang diimplementasikan
 
@@ -100,7 +100,7 @@ Kontrak output ditentukan oleh `SPEC_`. Dialek target dan versi minimum fitur di
 
 ## Batasan yang diketahui
 
-- **SQL yang dihasilkan belum dieksekusi terhadap database sungguhan.** Kebenarannya dibuktikan terhadap vector, bukan terhadap mesin database. Test integrasi per dialek direncanakan.
+- **Eksekusi pada database nyata sudah diuji untuk SQLite 3.51, PostgreSQL 16, dan MySQL 8.0** (36 skenario per mesin, semua harus mengembalikan hasil yang sama; lihat `integration/`). **SQL Server belum**: adapter dan job CI sudah ditulis tetapi belum pernah dijalankan. Versi minimum yang dinyatakan di `SPEC_` belum diuji satu per satu, hanya versi di atas.
 - Belum ada: `UNION`/`INTERSECT`, CTE (`WITH`), window function, DDL (`CREATE TABLE`, migrasi), `NULLS FIRST/LAST`, `RETURNING` untuk MySQL dan SQL Server, upsert untuk SQL Server (`MERGE`).
 - Fungsi SQL dan `raw` tidak divalidasi; `raw` adalah SQL tepercaya yang ditulis pengembang, bukan masukan pengguna.
 - Setiap `?` di dalam `raw` adalah placeholder; tanda tanya literal harus diberikan sebagai parameter.

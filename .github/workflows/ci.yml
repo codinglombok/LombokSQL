@@ -64,3 +64,63 @@ jobs:
       - run: npm ci && npm run build && npx tsc -p tsconfig.test.json
         working-directory: typescript
       - run: node scripts/mutation-test.mjs
+  integration:
+    # Menjalankan SQL hasil kompilasi pada mesin sungguhan dan membandingkan HASIL (integration/run.mjs).
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: pw
+          POSTGRES_DB: lsql
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: pw
+          MYSQL_DATABASE: lsql
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -ppw" --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci && npm run build
+        working-directory: typescript
+      - run: npm ci
+        working-directory: integration
+      - run: node --disable-warning=ExperimentalWarning run.mjs
+        working-directory: integration
+        env:
+          PG_URL: postgres://postgres:pw@127.0.0.1:5432/lsql
+          MYSQL_URL: mysql://root:pw@127.0.0.1:3306/lsql
+  integration-mssql:
+    # BELUM PERNAH DIJALANKAN (TD-13). continue-on-error agar hasil pertama tidak memblokir; hapus setelah hijau.
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    services:
+      mssql:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_SA_PASSWORD: "Lombok-Test-2026!"
+        ports: ["1433:1433"]
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P 'Lombok-Test-2026!' -Q 'select 1'" --health-interval 10s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci && npm run build
+        working-directory: typescript
+      - run: npm ci
+        working-directory: integration
+      - run: node --disable-warning=ExperimentalWarning run.mjs
+        working-directory: integration
+        env:
+          MSSQL_URL: "Server=127.0.0.1,1433;Database=master;User Id=sa;Password=Lombok-Test-2026!;TrustServerCertificate=true"

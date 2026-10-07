@@ -2,6 +2,14 @@
 
 Semua perubahan penting dicatat di sini. Format mengikuti [Keep a Changelog](https://keepachangelog.com/); entri terbaru di depan. Versi mengikuti [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- `integration/`: 36 skenario yang dieksekusi pada SQLite, PostgreSQL, dan MySQL dan membandingkan hasil (bukan teks SQL); adapter SQL Server (belum pernah dijalankan). Job CI `integration` dengan kontainer layanan.
+
+### Fixed
+- CI: `cargo fmt` pada seluruh crate, runner test portabel (Node 20), `.gitattributes` agar hash vector sama di Windows.
+
 ## [0.1.0] - 2026-10-06
 
 ### Added
