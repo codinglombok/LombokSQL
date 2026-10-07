@@ -25,7 +25,10 @@ pub struct Error {
 
 impl Error {
     fn new(code: &'static str, message: &str) -> Self {
-        Error { code, message: message.to_string() }
+        Error {
+            code,
+            message: message.to_string(),
+        }
     }
     /// Stable message id for translation through LombokLocale.
     pub fn message_id(&self) -> String {
@@ -133,7 +136,10 @@ struct Parser<'a> {
 
 /// Parse JSON text into a [`Value`] (depth limit 512). Errors use code `invalid_ast`.
 pub fn parse_json(s: &str) -> Res<Value> {
-    let mut p = Parser { b: s.as_bytes(), i: 0 };
+    let mut p = Parser {
+        b: s.as_bytes(),
+        i: 0,
+    };
     p.ws();
     let v = p.value(0)?;
     p.ws();
@@ -143,7 +149,7 @@ pub fn parse_json(s: &str) -> Res<Value> {
     Ok(v)
 }
 
-impl<'a> Parser<'a> {
+impl Parser<'_> {
     fn ws(&mut self) {
         while self.i < self.b.len() && matches!(self.b[self.i], b' ' | b'\t' | b'\n' | b'\r') {
             self.i += 1;
@@ -265,7 +271,9 @@ impl<'a> Parser<'a> {
             }
         }
         // slice boundaries are ASCII, hence valid UTF-8
-        Ok(Value::Num(String::from_utf8_lossy(&self.b[start..self.i]).into_owned()))
+        Ok(Value::Num(
+            String::from_utf8_lossy(&self.b[start..self.i]).into_owned(),
+        ))
     }
     fn hex4(&mut self) -> Res<u32> {
         if self.i + 4 > self.b.len() {
@@ -371,7 +379,10 @@ impl Dialect {
             "mysql" => Ok(Dialect::Mysql),
             "sqlite" => Ok(Dialect::Sqlite),
             "mssql" => Ok(Dialect::Mssql),
-            _ => Err(Error::new("invalid_dialect", &format!("unknown dialect: {}", s))),
+            _ => Err(Error::new(
+                "invalid_dialect",
+                &format!("unknown dialect: {}", s),
+            )),
         }
     }
 }
@@ -438,7 +449,10 @@ fn opt_bool(o: &Value, k: &str) -> Res<bool> {
 }
 
 fn is_scalar(v: &Value) -> bool {
-    matches!(v, Value::Null | Value::Bool(_) | Value::Num(_) | Value::Str(_))
+    matches!(
+        v,
+        Value::Null | Value::Bool(_) | Value::Num(_) | Value::Str(_)
+    )
 }
 
 fn check_depth(depth: usize) -> Res<()> {
@@ -549,7 +563,10 @@ impl Ctx {
             return bad("expression needs exactly one of col, value, raw, fn, query");
         }
         let mut out: String = match present[0] {
-            "col" => quote_path(self.d, str_of(has(e, "col").unwrap_or(&Value::Null), "col")?)?,
+            "col" => quote_path(
+                self.d,
+                str_of(has(e, "col").unwrap_or(&Value::Null), "col")?,
+            )?,
             "value" => {
                 let v = has(e, "value").unwrap_or(&Value::Null);
                 if !is_scalar(v) {
@@ -610,7 +627,10 @@ impl Ctx {
             Some(v) => str_of(v, "op")?,
             None => return bad("op must be a string"),
         };
-        let atom = |sql: String| CondOut { sql, kind: Kind::Atom };
+        let atom = |sql: String| CondOut {
+            sql,
+            kind: Kind::Atom,
+        };
         match op {
             "and" | "or" => {
                 let list = match has(c, "conds") {
@@ -631,7 +651,10 @@ impl Ctx {
                 let kind = if is_and { Kind::And } else { Kind::Or };
                 let sep = if is_and { " AND " } else { " OR " };
                 let strs: Vec<String> = parts.iter().map(|p| Self::wrap(p, kind)).collect();
-                Ok(CondOut { sql: strs.join(sep), kind })
+                Ok(CondOut {
+                    sql: strs.join(sep),
+                    kind,
+                })
             }
             "not" => {
                 let inner = match has(c, "cond") {
@@ -657,16 +680,31 @@ impl Ctx {
             "like" | "notLike" => {
                 let l = self.ex(c, "left", op, depth)?;
                 let r = self.ex(c, "right", op, depth)?;
-                Ok(atom(format!("{} {} {}", l, if op == "like" { "LIKE" } else { "NOT LIKE" }, r)))
+                Ok(atom(format!(
+                    "{} {} {}",
+                    l,
+                    if op == "like" { "LIKE" } else { "NOT LIKE" },
+                    r
+                )))
             }
             "ilike" | "notIlike" => {
                 let l = self.ex(c, "left", op, depth)?;
                 let r = self.ex(c, "right", op, depth)?;
                 let neg = op == "notIlike";
                 if self.d == Dialect::Postgres {
-                    Ok(atom(format!("{} {} {}", l, if neg { "NOT ILIKE" } else { "ILIKE" }, r)))
+                    Ok(atom(format!(
+                        "{} {} {}",
+                        l,
+                        if neg { "NOT ILIKE" } else { "ILIKE" },
+                        r
+                    )))
                 } else {
-                    Ok(atom(format!("LOWER({}) {} LOWER({})", l, if neg { "NOT LIKE" } else { "LIKE" }, r)))
+                    Ok(atom(format!(
+                        "LOWER({}) {} LOWER({})",
+                        l,
+                        if neg { "NOT LIKE" } else { "LIKE" },
+                        r
+                    )))
                 }
             }
             "in" | "notIn" => {
@@ -698,14 +736,26 @@ impl Ctx {
                 Ok(atom(format!(
                     "{} {} {} AND {}",
                     l,
-                    if op == "between" { "BETWEEN" } else { "NOT BETWEEN" },
+                    if op == "between" {
+                        "BETWEEN"
+                    } else {
+                        "NOT BETWEEN"
+                    },
                     lo,
                     hi
                 )))
             }
             "isNull" | "isNotNull" => {
                 let l = self.ex(c, "left", op, depth)?;
-                Ok(atom(format!("{} {}", l, if op == "isNull" { "IS NULL" } else { "IS NOT NULL" })))
+                Ok(atom(format!(
+                    "{} {}",
+                    l,
+                    if op == "isNull" {
+                        "IS NULL"
+                    } else {
+                        "IS NOT NULL"
+                    }
+                )))
             }
             "exists" | "notExists" => {
                 let q = match has(c, "query") {
@@ -713,7 +763,15 @@ impl Ctx {
                     None => return bad(&format!("{} requires query", op)),
                 };
                 let sub = self.select(q, depth + 1)?;
-                Ok(atom(format!("{} ({})", if op == "exists" { "EXISTS" } else { "NOT EXISTS" }, sub)))
+                Ok(atom(format!(
+                    "{} ({})",
+                    if op == "exists" {
+                        "EXISTS"
+                    } else {
+                        "NOT EXISTS"
+                    },
+                    sub
+                )))
             }
             "raw" => {
                 let s = self.raw_sql(has(c, "sql"), has(c, "params"))?;
@@ -744,7 +802,11 @@ impl Ctx {
                 None => return bad("subquery table requires as"),
             };
             let inner = self.select(q, depth + 1)?;
-            return Ok(format!("({}) AS {}", inner, quote_part(self.d, str_of(alias, "as")?)?));
+            return Ok(format!(
+                "({}) AS {}",
+                inner,
+                quote_part(self.d, str_of(alias, "as")?)?
+            ));
         }
         let name = match has(t, "name") {
             Some(n) => n,
@@ -914,7 +976,10 @@ impl Ctx {
             return Ok(String::new());
         }
         if self.d != Dialect::Postgres && self.d != Dialect::Sqlite {
-            return fail("unsupported_feature", "RETURNING is supported by postgres and sqlite only");
+            return fail(
+                "unsupported_feature",
+                "RETURNING is supported by postgres and sqlite only",
+            );
         }
         let mut list: Vec<String> = Vec::new();
         for x in r {
@@ -974,27 +1039,45 @@ impl Ctx {
             if self.d == Dialect::Mssql {
                 return fail("unsupported_feature", "upsert is not supported by mssql");
             }
-            let target = if has(oc, "target").is_some() { self.name_list(has(oc, "target"), "target")? } else { Vec::new() };
+            let target = if has(oc, "target").is_some() {
+                self.name_list(has(oc, "target"), "target")?
+            } else {
+                Vec::new()
+            };
             if nothing {
                 if self.d == Dialect::Mysql {
                     ignore = true;
                 } else {
                     conflict = format!(
                         " ON CONFLICT{} DO NOTHING",
-                        if target.is_empty() { String::new() } else { format!(" ({})", target.join(", ")) }
+                        if target.is_empty() {
+                            String::new()
+                        } else {
+                            format!(" ({})", target.join(", "))
+                        }
                     );
                 }
             } else {
                 let set = self.name_list(has(oc, "update"), "update")?;
                 if self.d == Dialect::Mysql {
-                    let items: Vec<String> = set.iter().map(|c| format!("{} = VALUES({})", c, c)).collect();
+                    let items: Vec<String> = set
+                        .iter()
+                        .map(|c| format!("{} = VALUES({})", c, c))
+                        .collect();
                     conflict = format!(" ON DUPLICATE KEY UPDATE {}", items.join(", "));
                 } else {
                     if target.is_empty() {
                         return bad("update upsert requires target");
                     }
-                    let items: Vec<String> = set.iter().map(|c| format!("{} = EXCLUDED.{}", c, c)).collect();
-                    conflict = format!(" ON CONFLICT ({}) DO UPDATE SET {}", target.join(", "), items.join(", "));
+                    let items: Vec<String> = set
+                        .iter()
+                        .map(|c| format!("{} = EXCLUDED.{}", c, c))
+                        .collect();
+                    conflict = format!(
+                        " ON CONFLICT ({}) DO UPDATE SET {}",
+                        target.join(", "),
+                        items.join(", ")
+                    );
                 }
             }
         }
@@ -1016,7 +1099,10 @@ impl Ctx {
             return Ok(format!(" WHERE {}", self.cond(w, depth + 1)?.sql));
         }
         if !opt_bool(s, "all")? {
-            return fail("missing_where", "update/delete without where requires all: true");
+            return fail(
+                "missing_where",
+                "update/delete without where requires all: true",
+            );
         }
         Ok(String::new())
     }
@@ -1066,17 +1152,26 @@ fn int_field(o: &Value, k: &str) -> Res<Option<u64>> {
             if (0.0..=MAX_SAFE).contains(&f) && (f as u64) as f64 == f {
                 Ok(Some(f as u64))
             } else {
-                fail("invalid_limit", &format!("{} must be a non-negative integer <= 9007199254740991", k))
+                fail(
+                    "invalid_limit",
+                    &format!("{} must be a non-negative integer <= 9007199254740991", k),
+                )
             }
         }
-        Some(_) => fail("invalid_limit", &format!("{} must be a non-negative integer <= 9007199254740991", k)),
+        Some(_) => fail(
+            "invalid_limit",
+            &format!("{} must be a non-negative integer <= 9007199254740991", k),
+        ),
     }
 }
 
 /// Compile a statement AST for a dialect name (`postgres`, `mysql`, `sqlite`, `mssql`).
 pub fn compile(ast: &Value, dialect: &str) -> Res<Compiled> {
     let d = Dialect::parse(dialect)?;
-    let mut ctx = Ctx { d, params: Vec::new() };
+    let mut ctx = Ctx {
+        d,
+        params: Vec::new(),
+    };
     if !ast.is_obj() {
         return bad("statement must be an object");
     }
@@ -1091,7 +1186,10 @@ pub fn compile(ast: &Value, dialect: &str) -> Res<Compiled> {
         "delete" => ctx.delete(ast, 0)?,
         _ => return bad(&format!("unknown statement type: {}", ty)),
     };
-    Ok(Compiled { sql, params: ctx.params })
+    Ok(Compiled {
+        sql,
+        params: ctx.params,
+    })
 }
 
 /// Universal entry point for FFI and scripting: JSON AST text in, [`Compiled`] out.

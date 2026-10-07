@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
-const read = (p: string): string => readFileSync(join(root, p), "utf8");
+const read = (p: string): string => readFileSync(join(root, p), "utf8").replace(/\r\n/g, "\n");
 const version = read("version.txt").trim();
 
 test("doctor-lite: vector sha256 in SPEC equals the vector file", () => {
