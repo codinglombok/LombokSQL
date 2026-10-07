@@ -2,7 +2,10 @@
 use lomboksql::{compile, parse_json, Value};
 
 fn vector_text() -> String {
-    let p = concat!(env!("CARGO_MANIFEST_DIR"), "/../vectors/lomboksql-vectors-v1.json");
+    let p = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../vectors/lomboksql-vectors-v1.json"
+    );
     std::fs::read_to_string(p).expect("vectors file")
 }
 
@@ -40,11 +43,21 @@ fn all_vectors_match() {
                         failures.push(format!("{}: error code {} != {}", name, e.code, s(code)));
                     }
                 }
-                (Some(code), Ok(r)) => failures.push(format!("{}: expected error {} but got {}", name, s(code), r.sql)),
+                (Some(code), Ok(r)) => failures.push(format!(
+                    "{}: expected error {} but got {}",
+                    name,
+                    s(code),
+                    r.sql
+                )),
                 (None, Err(e)) => failures.push(format!("{}: unexpected error {}", name, e)),
                 (None, Ok(r)) => {
                     if r.sql != s(expect.get("sql").unwrap()) {
-                        failures.push(format!("{}: sql\n  got      {}\n  expected {}", name, r.sql, s(expect.get("sql").unwrap())));
+                        failures.push(format!(
+                            "{}: sql\n  got      {}\n  expected {}",
+                            name,
+                            r.sql,
+                            s(expect.get("sql").unwrap())
+                        ));
                     }
                     let want = expect.get("params").unwrap().to_json();
                     if r.params_json() != want {
@@ -55,20 +68,40 @@ fn all_vectors_match() {
         }
     }
     assert!(total >= 100, "GP-11 needs >= 100 cases, ran {}", total);
-    assert!(failures.is_empty(), "{} of {} failed:\n{}", failures.len(), total, failures.join("\n"));
+    assert!(
+        failures.is_empty(),
+        "{} of {} failed:\n{}",
+        failures.len(),
+        total,
+        failures.join("\n")
+    );
     println!("vectors executed: {}", total);
 }
 
 #[test]
 fn compile_json_entry_point() {
-    let r = lomboksql::compile_json(r#"{"type":"select","from":"t","where":{"op":"eq","left":"a","right":{"value":1}}}"#, "postgres").unwrap();
+    let r = lomboksql::compile_json(
+        r#"{"type":"select","from":"t","where":{"op":"eq","left":"a","right":{"value":1}}}"#,
+        "postgres",
+    )
+    .unwrap();
     assert_eq!(r.sql, "SELECT * FROM \"t\" WHERE \"a\" = $1");
     assert_eq!(r.params_json(), "[1]");
 }
 
 #[test]
 fn malformed_json_is_invalid_ast() {
-    for bad in ["", "{", "[1,]", "{\"a\":}", "\"\\ud800\"", "01", "1.", "nul", "{} x"] {
+    for bad in [
+        "",
+        "{",
+        "[1,]",
+        "{\"a\":}",
+        "\"\\ud800\"",
+        "01",
+        "1.",
+        "nul",
+        "{} x",
+    ] {
         let e = lomboksql::compile_json(bad, "postgres").unwrap_err();
         assert_eq!(e.code, "invalid_ast", "input {:?}", bad);
     }
@@ -77,5 +110,8 @@ fn malformed_json_is_invalid_ast() {
 #[test]
 fn json_depth_limit_does_not_overflow_stack() {
     let deep = format!("{}1{}", "[".repeat(5000), "]".repeat(5000));
-    assert_eq!(lomboksql::compile_json(&deep, "postgres").unwrap_err().code, "invalid_ast");
+    assert_eq!(
+        lomboksql::compile_json(&deep, "postgres").unwrap_err().code,
+        "invalid_ast"
+    );
 }
