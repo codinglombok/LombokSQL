@@ -8,7 +8,7 @@
     "test": "node run.mjs"
   },
   "devDependencies": {
-    "mssql": "^11.0.0",
+    "mssql": "^12.7.3",
     "mysql2": "^3.11.0",
     "pg": "^8.13.0"
   }
