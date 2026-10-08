@@ -20,7 +20,7 @@ Key words MUST, MUST NOT, SHOULD and MAY are interpreted as in RFC 2119 and RFC 
 | Unicode | 16.0 | Identifier dan nilai dihitung per code point; hanya urutan scalar value yang sah |
 | ISO/IEC 9075 (SQL:2023) | 2023 | Acuan semantik umum `SELECT`, `INSERT`, `UPDATE`, `DELETE`, `JOIN`, `BETWEEN`, `IN`, `EXISTS` |
 
-Versi minimum dialek (diambil dari dokumentasi vendor; **belum diuji satu per satu**. Yang dieksekusi di `integration/`: SQLite 3.51.2, PostgreSQL 16.15, MySQL 8.0.46; SQL Server belum, lihat bagian 8):
+Versi minimum dialek (diambil dari dokumentasi vendor; **belum diuji satu per satu**. Yang dieksekusi di `integration/`: SQLite 3.51.2, PostgreSQL 16.15, MySQL 8.0.46; SQL Server belum lulus penuh, lihat bagian 8):
 
 | Dialek | Versi minimum untuk fitur terkait |
 |---|---|
@@ -172,7 +172,7 @@ Bila beberapa galat berlaku sekaligus, galat yang dilaporkan adalah galat pertam
 
 ## 8. Non-goals (0.1.0)
 
-`UNION`/`INTERSECT`, CTE, window function, DDL, `NULLS FIRST/LAST`, `MERGE`, `RETURNING`/`OUTPUT` untuk MySQL dan SQL Server, validasi isi `raw`, validasi terhadap skema database, dan eksekusi. Kebenaran SQL terhadap mesin database sungguhan diuji pada SQLite, PostgreSQL, dan MySQL (`integration/`); SQL Server belum pernah dijalankan.
+`UNION`/`INTERSECT`, CTE, window function, DDL, `NULLS FIRST/LAST`, `MERGE`, `RETURNING`/`OUTPUT` untuk MySQL dan SQL Server, validasi isi `raw`, validasi terhadap skema database, dan eksekusi. Kebenaran SQL terhadap mesin database sungguhan diuji pada SQLite, PostgreSQL, dan MySQL (`integration/`); SQL Server: run pertama 29 dari 36 skenario lulus, sisanya gagal karena fixture (diperbaiki, menunggu run ulang).
 
 ## 9. Riwayat perubahan kontrak
 

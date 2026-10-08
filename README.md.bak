@@ -100,7 +100,7 @@ Kontrak output ditentukan oleh `SPEC_`. Dialek target dan versi minimum fitur di
 
 ## Batasan yang diketahui
 
-- **Eksekusi pada database nyata sudah diuji untuk SQLite 3.51, PostgreSQL 16, dan MySQL 8.0** (36 skenario per mesin, semua harus mengembalikan hasil yang sama; lihat `integration/`). **SQL Server belum lulus penuh**: pada run pertama di CI, 29 dari 36 skenario lulus dan 7 gagal akibat tipe kolom `text` di fixture (bukan SQL yang dihasilkan); fixture sudah diperbaiki dan menunggu run ulang. Versi minimum yang dinyatakan di `SPEC_` belum diuji satu per satu, hanya versi di atas.
+- **Eksekusi pada database nyata sudah diuji untuk SQLite 3.51, PostgreSQL 16, dan MySQL 8.0** (36 skenario per mesin, semua harus mengembalikan hasil yang sama; lihat `integration/`). **SQL Server belum**: adapter dan job CI sudah ditulis tetapi belum pernah dijalankan. Versi minimum yang dinyatakan di `SPEC_` belum diuji satu per satu, hanya versi di atas.
 - Belum ada: `UNION`/`INTERSECT`, CTE (`WITH`), window function, DDL (`CREATE TABLE`, migrasi), `NULLS FIRST/LAST`, `RETURNING` untuk MySQL dan SQL Server, upsert untuk SQL Server (`MERGE`).
 - Fungsi SQL dan `raw` tidak divalidasi; `raw` adalah SQL tepercaya yang ditulis pengembang, bukan masukan pengguna.
 - Setiap `?` di dalam `raw` adalah placeholder; tanda tanya literal harus diberikan sebagai parameter.

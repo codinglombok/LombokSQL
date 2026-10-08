@@ -67,7 +67,8 @@ async function openMssql(conn) {
   };
 }
 
-const TEXT = (d) => (d === "mysql" ? "varchar(100)" : "text");
+// SQL Server's legacy `text` cannot be used with COUNT(DISTINCT), UPPER/LOWER or "=", so only PostgreSQL and SQLite get `text`.
+const TEXT = (d) => (d === "postgres" || d === "sqlite" ? "text" : "varchar(100)");
 async function reseed(e) {
   const d = e.dialect;
   const q = d === "mysql" ? (s) => "`" + s + "`" : d === "mssql" ? (s) => "[" + s + "]" : (s) => '"' + s + '"';
