@@ -48,7 +48,8 @@
     "test": "node ../scripts/run-ts-tests.mjs",
     "pretest": "tsc -p tsconfig.test.json",
     "prepack": "node -e \"for (const f of ['README.md','LICENSE-APACHE','LICENSE-MIT']) require('fs').copyFileSync('../'+f, f)\"",
-    "postpack": "node -e \"for (const f of ['README.md','LICENSE-APACHE','LICENSE-MIT']) require('fs').rmSync(f,{force:true})\""
+    "postpack": "node -e \"for (const f of ['README.md','LICENSE-APACHE','LICENSE-MIT']) require('fs').rmSync(f,{force:true})\"",
+    "coverage": "node ../scripts/run-ts-tests.mjs --coverage"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

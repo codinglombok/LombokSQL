@@ -70,3 +70,44 @@ test("errors carry a stable messageId", () => {
     assert.equal(e.messageId, "lomboksql.error.invalid_ast");
   }
 });
+
+test("every condition helper emits its documented op and compiles on all dialects", async () => {
+  const b = await import("../src/index.js");
+  const cases: [Record<string, unknown>, string][] = [
+    [b.ne("a", 1), "ne"], [b.lt("a", 1), "lt"], [b.lte("a", 1), "lte"], [b.gte("a", 1), "gte"],
+    [b.like("a", "x"), "like"], [b.notLike("a", "x"), "notLike"], [b.ilike("a", "x"), "ilike"], [b.notIlike("a", "x"), "notIlike"],
+    [b.isNotNull("a"), "isNotNull"], [b.notInList("a", [1]), "notIn"], [b.rawCond("a > ?", [1]), "raw"],
+    [b.between("a", 1, 2), "between"], [b.not(b.eq("a", 1)), "not"], [b.or(b.eq("a", 1)), "or"],
+  ];
+  for (const [ast, op] of cases) {
+    assert.equal(ast["op"], op);
+    for (const d of ["postgres", "mysql", "sqlite", "mssql"]) {
+      const r = b.select().from("t").where(ast).build(d);
+      assert.ok(r.sql.startsWith("SELECT * FROM"), `${op} on ${d}`);
+    }
+  }
+});
+
+test("every join and clause builder method maps to the AST", async () => {
+  const b = await import("../src/index.js");
+  const q = b.select("a.id")
+    .distinct()
+    .from("a")
+    .innerJoin("b", b.eq("a.id", b.col("b.id")))
+    .leftJoin("c", b.eq("a.id", b.col("c.id")))
+    .rightJoin("d", b.eq("a.id", b.col("d.id")))
+    .fullJoin("e", b.eq("a.id", b.col("e.id")))
+    .crossJoin({ name: "f", as: "ff" })
+    .groupBy("a.id")
+    .having(b.gt(b.fn("count", ["*"]), 0))
+    .orderBy("a.id");
+  const ast = q.toAst() as { joins: { kind: string }[]; distinct: boolean };
+  assert.deepEqual(ast.joins.map((j) => j.kind), ["inner", "left", "right", "full", "cross"]);
+  assert.equal(ast.distinct, true);
+  assert.ok(q.build("postgres").sql.includes('CROSS JOIN "f" AS "ff"'));
+  assert.throws(() => q.build("mysql"), (e: unknown) => e instanceof b.LombokSqlError && e.code === "unsupported_feature");
+  assert.equal(b.select().from(b.select("x").from("y"), "z").build("sqlite").sql, 'SELECT * FROM (SELECT "x" FROM "y") AS "z"');
+  assert.equal(b.insertInto("t").columns("a").values(1).onConflictDoNothing().returning("a").build("sqlite").sql, 'INSERT INTO "t" ("a") VALUES (?) ON CONFLICT DO NOTHING RETURNING "a"');
+  assert.equal(b.update("t").set("a", 1).where(b.eq("id", 1)).returning("a").build("postgres").sql, 'UPDATE "t" SET "a" = $1 WHERE "id" = $2 RETURNING "a"');
+  assert.equal(b.deleteFrom("t").where(b.eq("id", 1)).returning("id").build("sqlite").sql, 'DELETE FROM "t" WHERE "id" = ? RETURNING "id"');
+});

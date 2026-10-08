@@ -7,6 +7,9 @@ Semua perubahan penting dicatat di sini. Format mengikuti [Keep a Changelog](htt
 ### Added
 - `integration/`: 36 skenario yang dieksekusi pada SQLite, PostgreSQL, dan MySQL dan membandingkan hasil (bukan teks SQL); adapter SQL Server (belum pernah dijalankan). Job CI `integration` dengan kontainer layanan.
 
+### Changed
+- CI: action di-pin ke SHA, Dependabot (actions, npm, cargo), gerbang cakupan TypeScript 90% (terukur 98,7%).
+
 ### Fixed
 - CI: `cargo fmt` pada seluruh crate, runner test portabel (Node 20), `.gitattributes` agar hash vector sama di Windows.
 
