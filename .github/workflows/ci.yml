@@ -1,5 +1,5 @@
-# Mandiri sementara (TD-P0-08): ganti dengan pemanggil lombok-ci.yml dari codinglombok/.github.
-# Action di-pin ke SHA (diambil dari remote GitHub 2026-10-07); Dependabot memperbaruinya.
+# Self-contained for now (TD-P0-08): replace with a caller of lombok-ci.yml from codinglombok/.github.
+# Actions are pinned to SHAs (taken from the GitHub remote on 2026-10-07); Dependabot keeps them updated.
 name: ci
 on:
   push:
@@ -70,7 +70,7 @@ jobs:
         working-directory: typescript
       - run: node scripts/mutation-test.mjs
   integration:
-    # Menjalankan SQL hasil kompilasi pada mesin sungguhan dan membandingkan HASIL (integration/run.mjs).
+    # Runs the compiled SQL on real engines and compares RESULTS (integration/run.mjs).
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -104,7 +104,7 @@ jobs:
           PG_URL: postgres://postgres:pw@127.0.0.1:5432/lsql
           MYSQL_URL: mysql://root:pw@127.0.0.1:3306/lsql
   integration-mssql:
-    # BELUM PERNAH DIJALANKAN (TD-13). continue-on-error agar hasil pertama tidak memblokir; hapus setelah hijau.
+    # First run: 29/36 passed; fixture fixed afterwards, re-run unconfirmed (TD-13). continue-on-error keeps it from blocking; remove once green.
     runs-on: ubuntu-latest
     continue-on-error: true
     services:

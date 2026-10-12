@@ -1,30 +1,30 @@
 # Map LombokSQL v0.1.0
 
-## 1. Posisi dependensi
+## 1. Dependency position
 
-L0, cluster 03 (Format, Parser & Serialisasi), nomor katalog 03.11. Tidak memiliki dependensi Lombok wajib.
+L0, cluster 03 (Formats, Parsers & Serialization), catalog number 03.11. No required Lombok dependencies.
 
-## 2. Contoh dependen di ekosistem
+## 2. Example dependents in the ecosystem
 
-Bagian ini satu-satunya tempat nama aplikasi atau framework boleh muncul (ADR-019). Ini ilustrasi, bukan kepemilikan; siapa pun dapat memakai LombokSQL.
+This section is the only place where application or framework names may appear (ADR-019). It is an illustration, not ownership; anyone can use LombokSQL.
 
-| Pemakai | Jenis | Status integrasi | Keterangan |
+| Dependent | Kind | Integration status | Notes |
 |---|---|---|---|
-| LombokClarion v3 | Framework | rencana (F7) | Menggantikan lapisan persistence internal v2 |
-| LombokServer | Library L4 | rencana | Penyimpanan sesi dan konfigurasi |
-| LombokAuth, LombokSecurity | Library L1/L2 | rencana | Penyimpanan token dan jejak audit |
-| LombokDocFlow | Aplikasi | rencana | Penyimpanan metadata |
+| LombokClarion v3 | Framework | planned (F7) | Replaces the internal v2 persistence layer |
+| LombokServer | L4 library | planned | Session and configuration storage |
+| LombokAuth, LombokSecurity | L1/L2 libraries | planned | Token storage and audit trail |
+| LombokDocFlow | Application | planned | Metadata storage |
 
-Dependensi opsional LombokSQL ke library lain (LombokJSON, LombokLog, LombokValidator) belum diimplementasikan.
+LombokSQL's optional dependencies on other libraries (LombokJSON, LombokLog, LombokValidator) are not implemented yet.
 
-## 3. Bergantung pada
+## 3. Depends on
 
-Tidak ada.
+Nothing.
 
-## 4. Jalur kontrak normatif
+## 4. Normative contract path
 
-`docs/SPEC_LombokSQL_v0.1.0.md` -> `vectors/lomboksql-vectors-v1.json` (sha256 di SPEC) -> runner `rust/tests/vectors.rs` dan `typescript/test/vectors.test.ts`.
+`docs/SPEC_LombokSQL_v0.1.0.md` -> `vectors/lomboksql-vectors-v1.json` (sha256 in SPEC) -> runners `rust/tests/vectors.rs` and `typescript/test/vectors.test.ts`.
 
-## 5. Peta folder
+## 5. Folder map
 
-Lihat `structure_repo_LombokSQL_v0.1.0.md`.
+See `structure_repo_LombokSQL_v0.1.0.md`.

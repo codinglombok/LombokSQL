@@ -2,30 +2,31 @@
 
 ## 1. Roadmap
 
-| Versi | Isi |
+| Version | Content |
 |---|---|
-| 0.1.1 | Tutup syarat rilis: CI dijalankan, `doctor docs/privacy/style`, coverage diukur, `cargo-fuzz` target |
-| 0.2.0 | Matriks versi database di CI dan SQL Server hijau (suite integrasi sudah ada untuk SQLite, PostgreSQL, MySQL); `UNION`/`INTERSECT`; CTE; DDL minimal (`createTable`, `dropTable`, `createIndex`); port Python, Go, PHP |
-| 0.3.0 | Window function; `MERGE` untuk SQL Server; `OUTPUT` untuk SQL Server; `NULLS FIRST/LAST`; crate C-ABI dan WASM (ADR-010) |
-| 0.4.0 | Java/Kotlin, C#, Swift, C++ lewat C-ABI atau port; benchmark dan ukuran biner |
+| 0.1.1 | Close the release conditions: SQL Server job green, `doctor docs/privacy/style`, Rust coverage, `cargo-fuzz` target |
+| 0.2.0 | Database version matrix in CI and SQL Server green (the integration suite already exists for SQLite, PostgreSQL, MySQL); `UNION`/`INTERSECT`; CTEs; minimal DDL (`createTable`, `dropTable`, `createIndex`); Python, Go and PHP ports |
+| 0.3.0 | Window functions; `MERGE` for SQL Server; `OUTPUT` for SQL Server; `NULLS FIRST/LAST`; C-ABI and WASM crates (ADR-010) |
+| 0.4.0 | Java/Kotlin, C#, Swift, C++ through the C-ABI or ports; benchmarks and binary size |
 
 ## 2. Deferred scope
 
-Lihat SPEC bagian 8 dan README (Batasan).
+See SPEC section 8 and the README (Known limitations).
 
-## 3. Prinsip desain kontributor
+## 3. Design principles for contributors
 
-- Kontrak dulu, test dulu; semua port lulus vector yang sama.
-- Tidak ada dependensi runtime; dev-dependency dicatat.
-- Setiap fitur yang tidak ada pada dialek menghasilkan galat eksplisit, bukan keluaran yang diam-diam berbeda.
-- Urutan evaluasi kode mengikuti urutan keluaran SQL (menjaga urutan parameter).
+- Contract first, tests first; all ports pass the same vectors.
+- No runtime dependencies; dev dependencies are recorded.
+- A feature missing from a dialect produces an explicit error, not silently different output.
+- The evaluation order in the code follows the order of the SQL output (this keeps parameter order correct).
+- English is the default language for all documents, code comments and messages.
 
-## 4. Cara berkontribusi
+## 4. How to contribute
 
-Lihat `CONTRIBUTING.md`.
+See `CONTRIBUTING.md`.
 
-## 5. Pertanyaan terbuka
+## 5. Open questions
 
-- Apakah `limit`/`offset` sebaiknya opsional sebagai parameter terikat untuk dialek yang mendukungnya?
-- Apakah builder Rust diperlukan atau cukup AST JSON?
-- Dukungan MariaDB (`RETURNING`) sebagai dialek terpisah?
+- Should `limit`/`offset` optionally be bound parameters for the dialects that support it?
+- Is a Rust builder needed, or is the JSON AST enough?
+- Support for MariaDB (`RETURNING`) as a separate dialect?

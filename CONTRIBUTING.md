@@ -1,18 +1,18 @@
-# Berkontribusi
+# Contributing
 
-1. **Kontrak dulu.** Perubahan perilaku dimulai dari `docs/SPEC_LombokSQL_v0.1.0.md` dan `scripts/gen-vectors.mjs`, bukan dari kode.
-2. **Test dulu.** Tambahkan kasus golden dengan ekspektasi PostgreSQL yang ditulis tangan. Dialek lain diturunkan oleh transformasi string di pembangkit; override tulis tangan hanya untuk sintaks yang memang berbeda.
-3. **Semua port harus lulus.** Jalankan:
+1. **Contract first.** A behavior change starts in `docs/SPEC_LombokSQL_v0.1.0.md` and `scripts/gen-vectors.mjs`, not in the code.
+2. **Tests first.** Add golden cases whose PostgreSQL expectation is written by hand. The other dialects are derived by a string transform in the generator; hand-written overrides are only for syntax that genuinely differs.
+3. **Every port must pass.** Run:
 
 ```bash
-cd typescript && npm ci && npm test        # build + test TypeScript
-node ../scripts/gen-vectors.mjs            # setelah mengubah vector; catat sha256 baru di SPEC
+cd typescript && npm ci && npm test        # build + TypeScript tests
+node ../scripts/gen-vectors.mjs            # after changing vectors; record the new sha256 in SPEC
 cd ../rust && cargo test && cargo build --no-default-features
-node ../scripts/mutation-test.mjs          # semua mutan harus terbunuh
-cd ../integration && npm ci && node --disable-warning=ExperimentalWarning run.mjs   # SQLite selalu; tambahkan PG_URL / MYSQL_URL / MSSQL_URL untuk mesin lain
+node ../scripts/mutation-test.mjs          # every mutant must be killed
+cd ../integration && npm ci && node --disable-warning=ExperimentalWarning run.mjs   # SQLite always; add PG_URL / MYSQL_URL / MSSQL_URL for other engines
 ```
 
-4. Perubahan vector mengubah hash di `SPEC_`; perbarui `SPEC_`, `CHANGELOG.md`, dan `API_` pada PR yang sama.
-5. Pesan commit mengikuti Conventional Commits (`feat:`, `fix:`, `docs:`) dan bersifat fungsional.
-6. Jangan menyertakan data nyata, nama klien, atau domain organisasi nyata di contoh, test, atau pesan commit; gunakan data sintetis dan domain `example.com`.
-7. Dokumen berbahasa formal tanpa emoji.
+4. A vector change changes the hash in `SPEC_`; update `SPEC_`, `CHANGELOG.md` and `API_` in the same pull request.
+5. Commit messages follow Conventional Commits (`feat:`, `fix:`, `docs:`) and describe the change functionally.
+6. Do not include real data, client names or real organization domains in examples, tests or commit messages; use synthetic data and `example.com`.
+7. Documents are written in formal English without emoji. English is the default language of every Lombok repository.

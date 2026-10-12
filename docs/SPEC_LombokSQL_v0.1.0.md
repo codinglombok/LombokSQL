@@ -2,180 +2,180 @@
 
 This document is the normative cross-language contract. Every language port MUST produce byte-identical output for all specified inputs. Deviations from this specification are bugs.
 
-Key words MUST, MUST NOT, SHOULD and MAY are interpreted as in RFC 2119 and RFC 8174.
+The key words MUST, MUST NOT, SHOULD and MAY are to be interpreted as in RFC 2119 and RFC 8174.
 
-| Atribut | Nilai |
+| Attribute | Value |
 |---|---|
-| Versi kontrak | 0.1.0 |
-| Tanggal tinjauan standar acuan | 2026-10-06 |
-| Vector | `vectors/lomboksql-vectors-v1.json` |
-| SHA-256 vector | `39142d61f40466dc6afa4d312215ab2ea1dc59c432a8c78bcb61f51d75ef4164` |
+| Contract version | 0.1.0 |
+| Review date of reference standards | 2026-10-06 |
+| Vectors | `vectors/lomboksql-vectors-v1.json` |
+| Vector SHA-256 | `39142d61f40466dc6afa4d312215ab2ea1dc59c432a8c78bcb61f51d75ef4164` |
 
-## 0. Standar acuan (U2)
+## 0. Reference standards (U2)
 
-| Acuan | Versi | Pemakaian |
+| Reference | Version | Use |
 |---|---|---|
-| RFC 8259 | Desember 2017 | Sintaks JSON AST dan parameter |
-| RFC 2119, RFC 8174 | 1997, 2017 | Kata kunci normatif |
-| Unicode | 16.0 | Identifier dan nilai dihitung per code point; hanya urutan scalar value yang sah |
-| ISO/IEC 9075 (SQL:2023) | 2023 | Acuan semantik umum `SELECT`, `INSERT`, `UPDATE`, `DELETE`, `JOIN`, `BETWEEN`, `IN`, `EXISTS` |
+| RFC 8259 | December 2017 | Syntax of the JSON AST and of parameters |
+| RFC 2119, RFC 8174 | 1997, 2017 | Normative key words |
+| Unicode | 16.0 | Identifiers and values are processed per code point; only well-formed sequences of scalar values are valid |
+| ISO/IEC 9075 (SQL:2023) | 2023 | General semantics of `SELECT`, `INSERT`, `UPDATE`, `DELETE`, `JOIN`, `BETWEEN`, `IN`, `EXISTS` |
 
-Versi minimum dialek (diambil dari dokumentasi vendor; **belum diuji satu per satu**. Yang dieksekusi di `integration/`: SQLite 3.51.2, PostgreSQL 16.15, MySQL 8.0.46; SQL Server belum lulus penuh, lihat bagian 8):
+Minimum dialect versions (taken from vendor documentation; **not tested one by one**. What is executed in `integration/`: SQLite 3.51.2, PostgreSQL 16.15, MySQL 8.0.46; SQL Server does not pass completely yet, see section 8):
 
-| Dialek | Versi minimum untuk fitur terkait |
+| Dialect | Minimum version for the related feature |
 |---|---|
-| `postgres` | 9.5 (`ON CONFLICT`); `ILIKE`, `RETURNING` tersedia sejak lama |
-| `mysql` | 5.7 atau 8.0 (`ON DUPLICATE KEY UPDATE ... VALUES()`, `INSERT IGNORE`); `FULL JOIN` tidak didukung |
+| `postgres` | 9.5 (`ON CONFLICT`); `ILIKE` and `RETURNING` have long been available |
+| `mysql` | 5.7 or 8.0 (`ON DUPLICATE KEY UPDATE ... VALUES()`, `INSERT IGNORE`); `FULL JOIN` is not supported |
 | `sqlite` | 3.24 (upsert), 3.35 (`RETURNING`), 3.39 (`RIGHT`/`FULL JOIN`) |
-| `mssql` | 2012 (`OFFSET ... FETCH`); upsert dan `RETURNING` tidak didukung di 0.1.0 |
+| `mssql` | 2012 (`OFFSET ... FETCH`); upsert and `RETURNING` are not supported in 0.1.0 |
 
-## 1. Vector
+## 1. Vectors
 
-Berkas `vectors/lomboksql-vectors-v1.json` memuat objek `{ format, specVersion, note, groups }`. Setiap grup memuat `cases`; setiap kasus memuat `name`, `dialect`, `ast`, dan `expect`. `expect` berbentuk `{ "sql": string, "params": array }` atau `{ "error": code }`. Setiap port yang diklaim MUST menjalankan seluruh kasus dan MUST menghasilkan `sql` yang sama persis (byte demi byte), `params` yang sama persis (nilai dan urutan), atau `code` galat yang sama. Hash SHA-256 berkas di atas MUST sama dengan hash di tabel atribut; perubahan vector MUST memperbarui hash ini. Angka di `params` pada vector dinormalisasi (tanpa eksponen, tanpa nol di belakang); perilaku untuk penulisan angka lain tidak dispesifikasikan.
+The file `vectors/lomboksql-vectors-v1.json` contains an object `{ format, specVersion, note, groups }`. Each group contains `cases`; each case contains `name`, `dialect`, `ast` and `expect`. `expect` has the form `{ "sql": string, "params": array }` or `{ "error": code }`. Every claimed port MUST run all cases and MUST produce exactly the same `sql` (byte for byte), exactly the same `params` (values and order), or the same error `code`. The SHA-256 hash of the file MUST equal the hash in the attribute table above; a change to the vectors MUST update this hash. Numbers in `params` in the vectors are normalized (no exponent, no trailing zeros); behavior for other number spellings is unspecified.
 
-## 2. Antarmuka
+## 2. Interface
 
-`compile(ast, dialect) -> { sql: string, params: array }` atau galat. `dialect` MUST salah satu dari `postgres`, `mysql`, `sqlite`, `mssql`; selain itu galat `invalid_dialect`, dan pemeriksaan ini MUST dilakukan sebelum AST diperiksa. Fungsi MUST murni: tidak ada I/O, keadaan global, atau keacakan. `sql` tidak memuat titik koma penutup. `params` hanya berisi skalar JSON (`null`, boolean, angka, string).
+`compile(ast, dialect) -> { sql: string, params: array }` or an error. `dialect` MUST be one of `postgres`, `mysql`, `sqlite`, `mssql`; anything else is the error `invalid_dialect`, and this check MUST be performed before the AST is examined. The function MUST be pure: no I/O, no global state, no randomness. `sql` has no trailing semicolon. `params` contains only JSON scalars (`null`, boolean, number, string).
 
-Port MAY menyediakan antarmuka tambahan (builder, `compile_json`), tetapi keluarannya MUST sama dengan `compile` untuk AST yang setara.
+A port MAY provide additional interfaces (a builder, `compile_json`), but their output MUST equal that of `compile` for an equivalent AST.
 
-## 3. Model AST
+## 3. AST model
 
-AST adalah nilai JSON. Objek yang dibaca dengan kunci duplikat MUST memakai kemunculan terakhir. Kunci tak dikenal MUST diabaikan. Sebuah kunci dianggap ada bila ada dan nilainya bukan `undefined` (di JSON: ada); nilai `null` pada kunci opsional diperlakukan sebagai ada dan berlaku aturan tipe kunci tersebut.
+The AST is a JSON value. When an object is read with duplicate keys, the last occurrence MUST win. Unknown keys MUST be ignored. A key counts as present when it exists and its value is not `undefined` (in JSON: when it exists); a `null` value on an optional key counts as present and the type rule of that key applies.
 
-### 3.1 Pernyataan
+### 3.1 Statements
 
-| `type` | Kunci |
+| `type` | Keys |
 |---|---|
-| `select` | `from` (wajib), `columns`, `distinct`, `joins`, `where`, `groupBy`, `having`, `orderBy`, `limit`, `offset` |
-| `insert` | `into`, `columns`, `rows` (wajib semua), `onConflict`, `returning` |
-| `update` | `table`, `set` (wajib), `where`, `all`, `returning` |
-| `delete` | `from` (wajib), `where`, `all`, `returning` |
+| `select` | `from` (required), `columns`, `distinct`, `joins`, `where`, `groupBy`, `having`, `orderBy`, `limit`, `offset` |
+| `insert` | `into`, `columns`, `rows` (all required), `onConflict`, `returning` |
+| `update` | `table`, `set` (required), `where`, `all`, `returning` |
+| `delete` | `from` (required), `where`, `all`, `returning` |
 
-`type` yang bukan string atau tidak dikenal MUST menghasilkan `invalid_ast`.
+A `type` that is not a string or is unknown MUST produce `invalid_ast`.
 
-### 3.2 Ekspresi
+### 3.2 Expressions
 
-Ekspresi adalah string atau objek. String adalah referensi kolom (bagian 4.1). Objek MUST memiliki **tepat satu** dari kunci `col`, `value`, `raw`, `fn`, `query`; selain itu `invalid_ast`.
+An expression is a string or an object. A string is a column reference (section 4.1). An object MUST have **exactly one** of the keys `col`, `value`, `raw`, `fn`, `query`; otherwise `invalid_ast`.
 
-| Bentuk | Aturan keluaran |
+| Form | Output rule |
 |---|---|
 | `{col: s}` | `quotePath(s)` |
-| `{value: x}` | `x` MUST skalar (selain itu `invalid_ast`); dilekatkan ke `params` dan keluaran adalah placeholder |
-| `{raw: s, params: [...]}` | `s` string tidak kosong; setiap `?` pada `s` (tanpa pengecualian) diganti placeholder dan param berikutnya di `params`; jumlah `?` MUST sama dengan panjang `params` (default `[]`); setiap param MUST skalar |
-| `{fn: name, args: [...], distinct: bool}` | `name` MUST cocok `^[A-Za-z_][A-Za-z0-9_.]*$`; keluaran `UPPER(name) + "(" + ("DISTINCT " bila distinct) + args dipisah ", " + ")"`; `args` default `[]` |
+| `{value: x}` | `x` MUST be a scalar (otherwise `invalid_ast`); it is appended to `params` and the output is the placeholder |
+| `{raw: s, params: [...]}` | `s` is a non-empty string; every `?` in `s` (without exception) is replaced by a placeholder and the next param in `params`; the number of `?` MUST equal the length of `params` (default `[]`); every param MUST be a scalar |
+| `{fn: name, args: [...], distinct: bool}` | `name` MUST match `^[A-Za-z_][A-Za-z0-9_.]*$`; the output is `UPPER(name) + "(" + ("DISTINCT " if distinct) + args separated by ", " + ")"`; `args` defaults to `[]` |
 | `{query: select}` | `"(" + select + ")"` |
 
-`as` pada ekspresi hanya berlaku pada daftar `columns` dan `returning`: keluaran ditambah `" AS " + quotePart(as)`. Di tempat lain `as` MUST diabaikan.
+`as` on an expression applies only in the `columns` and `returning` lists: the output gets `" AS " + quotePart(as)` appended. Elsewhere `as` MUST be ignored.
 
-### 3.3 Kondisi
+### 3.3 Conditions
 
-Kondisi adalah objek dengan `op` string. Hasil kompilasi sebuah kondisi memiliki jenis `and`, `or`, atau `atom`.
+A condition is an object with a string `op`. The compilation result of a condition has a kind: `and`, `or` or `atom`.
 
-| `op` | Kunci | Keluaran (jenis) |
+| `op` | Keys | Output (kind) |
 |---|---|---|
-| `and`, `or` | `conds` (array, wajib) | Anak dikompilasi berurutan. 0 anak: `1 = 1` (`and`) atau `1 = 0` (`or`), jenis atom. 1 anak: hasil anak itu apa adanya (jenis anak). Selain itu anak digabung `" AND "`/`" OR "`; anak berjenis `and`/`or` yang berbeda dari induk MUST dibungkus `(...)`; anak atom atau sejenis tidak dibungkus. Jenis hasil = op induk |
-| `not` | `cond` | `NOT (` anak `)`, atom |
-| `eq` `ne` `gt` `gte` `lt` `lte` | `left`, `right` | `left SYM right` dengan SYM `=`, `<>`, `>`, `>=`, `<`, `<=`; atom |
+| `and`, `or` | `conds` (array, required) | Children are compiled in order. 0 children: `1 = 1` (`and`) or `1 = 0` (`or`), kind atom. 1 child: the result of that child unchanged (the child's kind). Otherwise children are joined with `" AND "`/`" OR "`; a child of kind `and`/`or` that differs from the parent MUST be wrapped in `(...)`; an atom or same-kind child is not wrapped. The kind of the result is the parent op |
+| `not` | `cond` | `NOT (` child `)`, atom |
+| `eq` `ne` `gt` `gte` `lt` `lte` | `left`, `right` | `left SYM right` with SYM `=`, `<>`, `>`, `>=`, `<`, `<=`; atom |
 | `like`, `notLike` | `left`, `right` | `LIKE` / `NOT LIKE`; atom |
-| `ilike`, `notIlike` | `left`, `right` | `postgres`: `ILIKE` / `NOT ILIKE`. Dialek lain: `LOWER(left) LIKE LOWER(right)` / `LOWER(left) NOT LIKE LOWER(right)` |
-| `in`, `notIn` | `left` dan (`values` array **atau** `query`) | Bila `query` ada: `left IN (select)`. Bila tidak: `values` array wajib; kosong menghasilkan `1 = 0` (`in`) atau `1 = 1` (`notIn`) **tanpa** mengompilasi `left`; selain itu `left IN (v1, v2, ...)` |
+| `ilike`, `notIlike` | `left`, `right` | `postgres`: `ILIKE` / `NOT ILIKE`. Other dialects: `LOWER(left) LIKE LOWER(right)` / `LOWER(left) NOT LIKE LOWER(right)` |
+| `in`, `notIn` | `left` and (`values` array **or** `query`) | If `query` is present: `left IN (select)`. Otherwise `values` is a required array; an empty array produces `1 = 0` (`in`) or `1 = 1` (`notIn`) **without** compiling `left`; otherwise `left IN (v1, v2, ...)` |
 | `between`, `notBetween` | `left`, `low`, `high` | `left BETWEEN low AND high` / `NOT BETWEEN` |
 | `isNull`, `isNotNull` | `left` | `left IS NULL` / `IS NOT NULL` |
 | `exists`, `notExists` | `query` | `EXISTS (select)` / `NOT EXISTS (select)` |
-| `raw` | `sql`, `params` | aturan `raw` bagian 3.2; atom |
+| `raw` | `sql`, `params` | the `raw` rule of section 3.2; atom |
 
-Operan kondisi adalah ekspresi (bagian 3.2). Kunci wajib yang hilang MUST `invalid_ast`. Op tak dikenal MUST `invalid_ast`.
+Operands of a condition are expressions (section 3.2). A missing required key MUST produce `invalid_ast`. An unknown op MUST produce `invalid_ast`.
 
-### 3.4 Tabel
+### 3.4 Tables
 
-`from` pada `select` dan `table` pada join adalah string (`quotePath`) atau objek: `{name, as?}` keluaran `quotePath(name)` dan `" AS " + quotePart(as)` bila ada; atau `{query, as}` keluaran `"(" + select + ") AS " + quotePart(as)` (`as` wajib). `into`, `table` (update), dan `from` (delete) MUST string biasa dan dikutip dengan `quotePath`.
+`from` in `select` and `table` in a join are a string (`quotePath`) or an object: `{name, as?}` whose output is `quotePath(name)` followed by `" AS " + quotePart(as)` if present; or `{query, as}` whose output is `"(" + select + ") AS " + quotePart(as)` (`as` is required). `into`, `table` (update) and `from` (delete) MUST be plain strings and are quoted with `quotePath`.
 
 ### 3.5 Select
 
-Keluaran dirangkai berurutan dan dipisah satu spasi:
+The output is assembled in order and separated by one space:
 
-1. `SELECT`, lalu `DISTINCT` bila `distinct` true (`distinct` bukan boolean: `invalid_ast`).
-2. Kolom: bila `columns` kosong atau tidak ada: `*`; selain itu ekspresi dipisah `", "` (alias diizinkan).
-3. `FROM` tabel.
-4. Setiap join: `KIND JOIN tabel` lalu `ON kondisi`. `kind` default `inner`; nilai sah `inner`, `left`, `right`, `full`, `cross` (huruf kecil), huruf besar di keluaran. `cross` MUST tanpa `on`; lainnya MUST punya `on`. `full` pada `mysql` MUST `unsupported_feature`.
-5. `WHERE kondisi`, bila ada. Kondisi tingkat atas tidak dibungkus kurung.
-6. `GROUP BY` ekspresi (bila array tidak kosong).
-7. `HAVING kondisi`.
-8. `ORDER BY`: setiap butir adalah ekspresi atau `{expr, dir}` (`dir` `asc`|`desc`, default asc, selain itu `invalid_ast`). Keluaran selalu `ekspresi ASC|DESC`. Butir objek yang memiliki kunci `expr` ditafsirkan sebagai `{expr, dir}`.
-9. Paginasi (bagian 5).
+1. `SELECT`, then `DISTINCT` if `distinct` is true (a non-boolean `distinct` is `invalid_ast`).
+2. Columns: if `columns` is empty or absent: `*`; otherwise expressions separated by `", "` (aliases allowed).
+3. `FROM` table.
+4. Each join: `KIND JOIN table` then `ON condition`. `kind` defaults to `inner`; valid values are `inner`, `left`, `right`, `full`, `cross` (lowercase), uppercase in the output. `cross` MUST NOT have `on`; every other kind MUST have `on`. `full` on `mysql` MUST produce `unsupported_feature`.
+5. `WHERE condition`, if present. The top-level condition is not wrapped in parentheses.
+6. `GROUP BY` expressions (if the array is not empty).
+7. `HAVING condition`.
+8. `ORDER BY`: each item is an expression or `{expr, dir}` (`dir` is `asc`|`desc`, default asc, otherwise `invalid_ast`). The output is always `expression ASC|DESC`. An object item that has the key `expr` is interpreted as `{expr, dir}`.
+9. Pagination (section 5).
 
-Urutan pelekatan parameter MUST mengikuti urutan kemunculan placeholder di `sql` (kiri ke kanan); implementasi MUST mengompilasi bagian sesuai urutan 2 sampai 8.
+The order in which parameters are attached MUST follow the order in which placeholders appear in `sql` (left to right); an implementation MUST compile the parts in the order 2 to 8.
 
 ### 3.6 Insert
 
-`INSERT INTO tabel (kolom, ...) VALUES (sel, ...), (sel, ...)` ditambah klausa konflik dan `RETURNING`. `columns` array string tidak kosong, setiap nama dikutip dengan `quotePart` (satu nama, titik tidak dipecah). `rows` array tidak kosong; setiap baris array ekspresi dengan panjang sama dengan `columns` (selain itu `invalid_ast`). `onConflict` objek dengan **tepat satu** dari `doNothing: true` atau `update: [kolom, ...]`; `target` array nama kolom opsional.
+`INSERT INTO table (column, ...) VALUES (cell, ...), (cell, ...)` followed by a conflict clause and `RETURNING`. `columns` is a non-empty array of strings, each name quoted with `quotePart` (a single name; dots are not split). `rows` is a non-empty array; each row is an array of expressions with the same length as `columns` (otherwise `invalid_ast`). `onConflict` is an object with **exactly one** of `doNothing: true` or `update: [column, ...]`; `target` is an optional array of column names.
 
-| Dialek | `doNothing` | `update` |
+| Dialect | `doNothing` | `update` |
 |---|---|---|
-| `postgres`, `sqlite` | ` ON CONFLICT (target) DO NOTHING` (tanpa `(target)` bila target tidak ada) | ` ON CONFLICT (target) DO UPDATE SET "c" = EXCLUDED."c", ...`; `target` MUST ada dan tidak kosong |
-| `mysql` | awalan `INSERT IGNORE INTO`; `target` diabaikan | ` ON DUPLICATE KEY UPDATE `c` = VALUES(`c`), ...`; `target` diabaikan |
+| `postgres`, `sqlite` | ` ON CONFLICT (target) DO NOTHING` (without `(target)` if there is no target) | ` ON CONFLICT (target) DO UPDATE SET "c" = EXCLUDED."c", ...`; `target` MUST be present and non-empty |
+| `mysql` | prefix `INSERT IGNORE INTO`; `target` is ignored | ` ON DUPLICATE KEY UPDATE `c` = VALUES(`c`), ...`; `target` is ignored |
 | `mssql` | `unsupported_feature` | `unsupported_feature` |
 
-### 3.7 Update dan Delete
+### 3.7 Update and Delete
 
-`UPDATE tabel SET "c" = ekspresi, ...`: `set` array tidak kosong berisi `{col, expr}` terurut; nama kolom dikutip `quotePart`. `DELETE FROM tabel`. Untuk keduanya: bila `where` ada keluaran ` WHERE kondisi`; bila `where` tidak ada, `all` MUST `true`, selain itu galat `missing_where`. `all` yang bukan boolean MUST `invalid_ast`. Bila `where` ada, `all` tidak berpengaruh.
+`UPDATE table SET "c" = expression, ...`: `set` is a non-empty array of ordered `{col, expr}` items; column names are quoted with `quotePart`. `DELETE FROM table`. For both: if `where` is present the output is ` WHERE condition`; if `where` is absent, `all` MUST be `true`, otherwise the error is `missing_where`. A non-boolean `all` MUST produce `invalid_ast`. When `where` is present, `all` has no effect.
 
 ### 3.8 Returning
 
-`returning` array ekspresi (alias diizinkan); array kosong atau tidak ada tidak menghasilkan apa pun. Pada `postgres` dan `sqlite`: ` RETURNING ekspresi, ...`; pada dialek lain dengan array tidak kosong MUST `unsupported_feature`.
+`returning` is an array of expressions (aliases allowed); an empty or absent array produces nothing. On `postgres` and `sqlite`: ` RETURNING expression, ...`; on other dialects with a non-empty array it MUST produce `unsupported_feature`.
 
-## 4. Pengutipan dan placeholder
+## 4. Quoting and placeholders
 
-### 4.1 Identifier
+### 4.1 Identifiers
 
-`quotePart(s)`: `s` MUST tidak kosong dan tidak mengandung U+0000 (selain itu `invalid_identifier`). `postgres`/`sqlite`: `"` + s dengan `"` digandakan + `"`. `mysql`: `` ` `` + s dengan `` ` `` digandakan + `` ` ``. `mssql`: `[` + s dengan `]` digandakan + `]`.
+`quotePart(s)`: `s` MUST be non-empty and MUST NOT contain U+0000 (otherwise `invalid_identifier`). `postgres`/`sqlite`: `"` + s with `"` doubled + `"`. `mysql`: `` ` `` + s with `` ` `` doubled + `` ` ``. `mssql`: `[` + s with `]` doubled + `]`.
 
-`quotePath(s)`: `s` dipecah pada setiap `.` (sehingga `a..b`, `.a`, `a.` menghasilkan bagian kosong dan `invalid_identifier`); setiap bagian dikutip dengan `quotePart`, kecuali bagian `*` yang merupakan bagian **terakhir**, yang ditulis `*` tanpa kutip. Bagian `*` di posisi lain dikutip biasa.
+`quotePath(s)`: `s` is split at every `.` (so `a..b`, `.a` and `a.` produce an empty part and `invalid_identifier`); each part is quoted with `quotePart`, except a part `*` that is the **last** part, which is written as `*` without quotes. A `*` part in any other position is quoted normally.
 
-### 4.2 Placeholder
+### 4.2 Placeholders
 
-Parameter dinomori 1, 2, ... menurut urutan pelekatan. `postgres`: `$n`. `sqlite`, `mysql`: `?`. `mssql`: `@pn`.
+Parameters are numbered 1, 2, ... in the order they are attached. `postgres`: `$n`. `sqlite`, `mysql`: `?`. `mssql`: `@pn`.
 
-## 5. Paginasi
+## 5. Pagination
 
-`limit` dan `offset` MUST bilangan bulat tak negatif dan paling besar 9007199254740991 (selain itu `invalid_limit`; bukan angka, misalnya string atau `null`, juga `invalid_limit`). Keduanya ditulis langsung (bukan parameter).
+`limit` and `offset` MUST be non-negative integers of at most 9007199254740991 (otherwise `invalid_limit`; a non-number such as a string or `null` is also `invalid_limit`). Both are written directly (not as parameters).
 
-| Dialek | Keluaran |
+| Dialect | Output |
 |---|---|
-| `postgres` | ` LIMIT n` bila limit; ` OFFSET m` bila offset |
-| `sqlite` | seperti postgres; bila hanya offset: ` LIMIT -1 OFFSET m` |
-| `mysql` | seperti postgres; bila hanya offset: ` LIMIT 18446744073709551615 OFFSET m` |
-| `mssql` | bila tidak ada `ORDER BY`: ` ORDER BY (SELECT NULL)`; lalu ` OFFSET m ROWS` (m=0 bila tak ada offset); lalu ` FETCH NEXT n ROWS ONLY` bila limit |
+| `postgres` | ` LIMIT n` if limit; ` OFFSET m` if offset |
+| `sqlite` | like postgres; if only offset: ` LIMIT -1 OFFSET m` |
+| `mysql` | like postgres; if only offset: ` LIMIT 18446744073709551615 OFFSET m` |
+| `mssql` | if there is no `ORDER BY`: ` ORDER BY (SELECT NULL)`; then ` OFFSET m ROWS` (m=0 if there is no offset); then ` FETCH NEXT n ROWS ONLY` if limit |
 
-## 6. Keamanan
+## 6. Security
 
-- Nilai (`value`, param `raw`) MUST tidak pernah menjadi bagian teks `sql`.
-- Identifier MUST selalu dikutip; satu-satunya pengecualian adalah `*` terakhir dan fungsi (`fn`, yang divalidasi regex) dan `raw` (SQL tepercaya).
-- Kedalaman: ekspresi, kondisi, dan select bersarang MUST dibatasi 64 tingkat (kedalaman 0 untuk pernyataan; setiap panggilan bersarang menambah 1; kedalaman > 64 adalah `too_deep`). Implementasi MUST tidak mengalami kehabisan stack pada masukan apa pun yang secara sintaks sah.
-- Port yang menerima teks JSON MUST membatasi kedalaman parser (port Rust: 512) dan memetakan galat sintaks ke `invalid_ast`.
-- Masukan apa pun MUST menghasilkan hasil atau galat dengan `code` pada bagian 7; panic atau pengecualian lain adalah bug.
+- Values (`value`, `raw` params) MUST never become part of the `sql` text.
+- Identifiers MUST always be quoted; the only exceptions are a trailing `*`, functions (`fn`, validated by a regular expression) and `raw` (trusted SQL).
+- Depth: nested expressions, conditions and selects MUST be limited to 64 levels (depth 0 for the statement; every nested call adds 1; depth > 64 is `too_deep`). An implementation MUST NOT exhaust its stack on any syntactically valid input.
+- A port that accepts JSON text MUST limit the parser depth (Rust port: 512) and map syntax errors to `invalid_ast`.
+- Any input MUST produce a result or an error with a `code` from section 7; a panic or any other exception is a bug.
 
-## 7. Galat
+## 7. Errors
 
-| `code` | Kondisi | `messageId` |
+| `code` | Condition | `messageId` |
 |---|---|---|
-| `invalid_ast` | bentuk atau tipe AST salah, kunci wajib hilang, pilihan tak dikenal, JSON tidak sah | `lomboksql.error.invalid_ast` |
-| `invalid_identifier` | identifier kosong, mengandung NUL, atau bagian jalur kosong | `lomboksql.error.invalid_identifier` |
-| `invalid_dialect` | dialek tidak dikenal (peka huruf) | `lomboksql.error.invalid_dialect` |
-| `invalid_limit` | `limit`/`offset` bukan bilangan bulat 0..9007199254740991 | `lomboksql.error.invalid_limit` |
-| `unsupported_feature` | fitur tidak ada pada dialek | `lomboksql.error.unsupported_feature` |
-| `missing_where` | update/delete tanpa `where` dan tanpa `all: true` | `lomboksql.error.missing_where` |
-| `too_deep` | kedalaman > 64 | `lomboksql.error.too_deep` |
+| `invalid_ast` | wrong AST shape or type, missing required key, unknown choice, invalid JSON | `lomboksql.error.invalid_ast` |
+| `invalid_identifier` | empty identifier, contains NUL, or empty path part | `lomboksql.error.invalid_identifier` |
+| `invalid_dialect` | unknown dialect (case-sensitive) | `lomboksql.error.invalid_dialect` |
+| `invalid_limit` | `limit`/`offset` is not an integer in 0..9007199254740991 | `lomboksql.error.invalid_limit` |
+| `unsupported_feature` | feature does not exist in the dialect | `lomboksql.error.unsupported_feature` |
+| `missing_where` | update/delete without `where` and without `all: true` | `lomboksql.error.missing_where` |
+| `too_deep` | depth > 64 | `lomboksql.error.too_deep` |
 
-Bila beberapa galat berlaku sekaligus, galat yang dilaporkan adalah galat pertama dalam urutan evaluasi bagian 3 (dialek lebih dulu, lalu urutan pengompilasian). Urutan insert: `into`, `columns`, `rows` (baris demi baris), `onConflict`, `returning`; update: `table`, `set`, `where`/`all`, `returning`; delete: `from`, `where`/`all`, `returning`.
+When several errors apply at once, the reported error is the first one in the evaluation order of section 3 (dialect first, then compilation order). Insert order: `into`, `columns`, `rows` (row by row), `onConflict`, `returning`; update: `table`, `set`, `where`/`all`, `returning`; delete: `from`, `where`/`all`, `returning`.
 
 ## 8. Non-goals (0.1.0)
 
-`UNION`/`INTERSECT`, CTE, window function, DDL, `NULLS FIRST/LAST`, `MERGE`, `RETURNING`/`OUTPUT` untuk MySQL dan SQL Server, validasi isi `raw`, validasi terhadap skema database, dan eksekusi. Kebenaran SQL terhadap mesin database sungguhan diuji pada SQLite, PostgreSQL, dan MySQL (`integration/`); SQL Server: run pertama 29 dari 36 skenario lulus, sisanya gagal karena fixture (diperbaiki, menunggu run ulang).
+`UNION`/`INTERSECT`, CTEs, window functions, DDL, `NULLS FIRST/LAST`, `MERGE`, `RETURNING`/`OUTPUT` for MySQL and SQL Server, validation of the content of `raw`, validation against a database schema, and execution. The correctness of the SQL against real database engines is tested on SQLite, PostgreSQL and MySQL (`integration/`); SQL Server: in the first run, 29 of 36 scenarios passed and the rest failed because of the fixture (fixed, re-run pending).
 
-## 9. Riwayat perubahan kontrak
+## 9. Contract change history
 
-| Versi | Perubahan |
+| Version | Change |
 |---|---|
-| 0.1.0 | Kontrak awal |
+| 0.1.0 | Initial contract |

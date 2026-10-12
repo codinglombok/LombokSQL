@@ -1,4 +1,4 @@
-# Dependencies and build output
+# Dependencies, build output and editor backups
 node_modules/
 dist/
 dist-test/
@@ -7,8 +7,10 @@ target/
 Cargo.lock
 *.tsbuildinfo
 .DS_Store
+*.bak
+*.orig
 
-# Dokumen internal Lombok Ecosystem (v3.6, ADR-024) - tidak di-commit
+# Lombok Ecosystem internal documents (v3.6, ADR-024) - not committed
 /map
 /docs/*architecture*.*
 /docs/*masterplan*.*

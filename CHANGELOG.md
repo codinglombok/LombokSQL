@@ -1,31 +1,29 @@
 # Changelog
 
-Semua perubahan penting dicatat di sini. Format mengikuti [Keep a Changelog](https://keepachangelog.com/); entri terbaru di depan. Versi mengikuti [SemVer](https://semver.org/).
+All notable changes are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/); the newest entry comes first. Versions follow [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
 ### Added
-- `integration/`: 36 skenario yang dieksekusi pada SQLite, PostgreSQL, dan MySQL dan membandingkan hasil (bukan teks SQL); adapter SQL Server (belum pernah dijalankan). Job CI `integration` dengan kontainer layanan.
-
-### Fixed (integrasi)
-- Fixture SQL Server memakai `varchar(100)` alih-alih `text` (run pertama: 7 kegagalan akibat tipe `text`).
-
-### Changed
-- CI: action di-pin ke SHA, Dependabot (actions, npm, cargo), gerbang cakupan TypeScript 90% (terukur 98,7%).
+- `integration/`: 36 scenarios executed on SQLite, PostgreSQL and MySQL that compare results (not SQL text); a SQL Server adapter. CI job `integration` with service containers.
 
 ### Fixed
-- CI: `cargo fmt` pada seluruh crate, runner test portabel (Node 20), `.gitattributes` agar hash vector sama di Windows.
+- SQL Server integration fixture uses `varchar(100)` instead of `text` (first run: 7 failures caused by the `text` type).
+- CI: `cargo fmt` applied to the whole crate, portable test runner (Node 20), `.gitattributes` so that the vector hash is the same on Windows.
+
+### Changed
+- CI: actions pinned to SHAs, Dependabot (actions, npm, cargo), TypeScript coverage gate at 90% (measured: 98.7%).
 
 ## [0.1.0] - 2026-10-06
 
 ### Added
-- Kompiler AST JSON ke SQL berparameter untuk PostgreSQL, MySQL, SQLite, dan SQL Server.
-- Pernyataan `select`, `insert`, `update`, `delete` dengan kondisi, join, subquery, agregasi, paginasi, upsert, dan `RETURNING` (PostgreSQL dan SQLite).
-- Perlindungan `missing_where` untuk `update` dan `delete` tanpa `WHERE`.
-- Port Rust (`no_std + alloc`, tanpa dependensi) dan port TypeScript (tanpa dependensi runtime).
-- Builder fluent TypeScript.
-- Vector bersama 716 kasus, dijalankan oleh runner Rust dan TypeScript.
-- Pseudo-fuzz, fuzz berbasis mutasi AST, dan skrip uji mutasi (25 mutan).
+- Compiler from a JSON AST to parameterized SQL for PostgreSQL, MySQL, SQLite and SQL Server.
+- `select`, `insert`, `update` and `delete` statements with conditions, joins, subqueries, aggregation, pagination, upsert and `RETURNING` (PostgreSQL and SQLite).
+- `missing_where` protection for `update` and `delete` without `WHERE`.
+- Rust port (`no_std + alloc`, no dependencies) and TypeScript port (no runtime dependencies).
+- Fluent TypeScript builder.
+- Shared vectors of 716 cases, executed by the Rust and TypeScript runners.
+- Pseudo-fuzzing, AST mutation fuzzing and a mutation-testing script (25 mutants).
 
 ### Security
-- Nilai selalu terikat sebagai parameter; identifier selalu dikutip; batas kedalaman 64.
+- Values are always bound as parameters; identifiers are always quoted; nesting is limited to 64 levels.

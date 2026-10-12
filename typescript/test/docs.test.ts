@@ -59,6 +59,30 @@ test("doctor-lite: public markdown has no emoji and no forbidden ownership phras
   }
 });
 
+test("doctor-lite: English is the default language of every public document", () => {
+  // Unambiguous Indonesian function words; two or more on one line means the line is not English.
+  const stop = /\b(yang|dan|dengan|untuk|tidak|atau|dari|pada|adalah|sudah|belum|harus|dapat|akan|karena|semua)\b/gi;
+  const files = ["README.md", "CHANGELOG.md", "SECURITY.md", "CONTRIBUTING.md", "vectors/README.md", "docs/TECH_DEBT.md", "typescript/test/docs.test.ts", ".github/workflows/ci.yml", ".gitignore", ".gitattributes"];
+  for (const d of ["changelog", "map", "structure_repo", "full_summary_project", "guide_how_to_use", "how_to_dist", "development_ide", "API", "Lang", "SPEC"]) files.push(`docs/${d}_LombokSQL_v${version}.md`);
+  for (const f of files) {
+    read(f).split("\n").forEach((line, i) => {
+      if (f === "typescript/test/docs.test.ts" && (line.includes("const stop") || line.includes("const forbidden"))) return; // pattern definitions, not prose
+      assert.ok((line.match(stop) ?? []).length < 2, `${f}:${i + 1} is not English: ${line.slice(0, 80)}`);
+    });
+  }
+  assert.ok(read("docs/Lang_LombokSQL_v" + version + ".md").includes("English"));
+});
+
+test("doctor-lite: no backup files are tracked by git", () => {
+  let tracked: string;
+  try {
+    tracked = execFileSync("git", ["ls-files"], { cwd: root, encoding: "utf8" });
+  } catch {
+    return; // not a git checkout
+  }
+  assert.ok(!/\.(bak|orig|rej)$/m.test(tracked), "backup files are tracked");
+});
+
 test("doctor-lite: .gitignore carries the three ADR-024 lines", () => {
   const g = read(".gitignore");
   for (const line of ["/map", "/docs/*architecture*.*", "/docs/*masterplan*.*"]) assert.ok(g.split("\n").includes(line), line);

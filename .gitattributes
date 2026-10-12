@@ -1,4 +1,4 @@
-# Keluaran harus byte-identik di semua OS: hash vector dan teks normatif tidak boleh berubah oleh CRLF.
+# Output must be byte-identical on every OS: the vector hash and the normative text must not be changed by CRLF.
 * text=auto eol=lf
 *.json text eol=lf
 *.md text eol=lf

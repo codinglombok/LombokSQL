@@ -1,14 +1,18 @@
-# Changelog LombokSQL (ringkasan)
+# Changelog LombokSQL (summary)
 
-Entri terbaru di depan. Rincian ada di `CHANGELOG.md`.
+The newest entry comes first. Details are in `CHANGELOG.md`.
+
+## Unreleased
+
+- Integration suite on real databases (SQLite, PostgreSQL, MySQL; SQL Server adapter), CI fixes, pinned actions, coverage gate.
 
 ## 0.1.0 - 2026-10-06
 
 ### Added
-- Kompiler AST JSON ke SQL berparameter untuk `postgres`, `mysql`, `sqlite`, `mssql`.
-- `select`, `insert` (upsert, `RETURNING`), `update`, `delete`; perlindungan `missing_where`.
-- Port Rust `no_std + alloc` dan port TypeScript; builder fluent TypeScript.
-- Vector 716 kasus; runner di kedua port; fuzz, uji mutasi.
+- Compiler from a JSON AST to parameterized SQL for `postgres`, `mysql`, `sqlite`, `mssql`.
+- `select`, `insert` (upsert, `RETURNING`), `update`, `delete`; `missing_where` protection.
+- Rust `no_std + alloc` port and TypeScript port; fluent TypeScript builder.
+- 716 vectors; runners in both ports; fuzzing and mutation testing.
 
 ### Security
-- Nilai selalu terikat; identifier selalu dikutip; batas kedalaman 64.
+- Values are always bound; identifiers are always quoted; nesting limit of 64 levels.

@@ -1,25 +1,25 @@
-# Kebijakan Keamanan
+# Security Policy
 
-## Versi yang didukung
+## Supported versions
 
-| Versi | Dukungan |
+| Version | Support |
 |---|---|
-| 0.1.x | Perbaikan keamanan |
+| 0.1.x | Security fixes |
 
-## Melaporkan kerentanan
+## Reporting a vulnerability
 
-Gunakan **GitHub Private Vulnerability Reporting** pada repo ini (tab Security, "Report a vulnerability"). Jangan membuka issue publik untuk kerentanan.
+Use **GitHub Private Vulnerability Reporting** on this repository (Security tab, "Report a vulnerability"). Do not open a public issue for a vulnerability.
 
-- Respons awal: paling lama 48 jam.
-- Perbaikan untuk temuan kritis: target 7 hari.
-- Pengungkapan dikoordinasikan dengan pelapor.
+- Initial response: within 48 hours.
+- Fix for critical findings: 7 days (target).
+- Disclosure is coordinated with the reporter.
 
-## Cakupan
+## Scope
 
-Dalam cakupan: kompiler (`compile`, `compile_json`, parser JSON Rust), khususnya cara apa pun agar nilai atau identifier yang dikendalikan penyerang menjadi bagian SQL yang tidak terkutip, melewati batas kedalaman, atau menyebabkan panic, crash, atau waktu eksekusi tak terbatas.
+In scope: the compiler (`compile`, `compile_json`, the Rust JSON parser), in particular any way for an attacker-controlled value or identifier to become part of the SQL unquoted, to bypass the nesting limit, or to cause a panic, crash or unbounded execution time.
 
-Di luar cakupan: isi `raw` (SQL tepercaya yang ditulis pengembang), kebenaran SQL terhadap versi database tertentu yang tidak dinyatakan di `SPEC_`, dan driver database.
+Out of scope: the content of `raw` (trusted SQL written by the developer), the correctness of SQL against a specific database version that is not stated in `SPEC_`, and database drivers.
 
-## Model ancaman ringkas
+## Short threat model
 
-Lihat bagian 6 pada dokumen `docs/` terkait keamanan dan `docs/SPEC_LombokSQL_v0.1.0.md`.
+See section 6 of the security-related documents in `docs/` and `docs/SPEC_LombokSQL_v0.1.0.md`.
